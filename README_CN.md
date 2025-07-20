@@ -40,84 +40,68 @@ implementation 'com.torchv.infra:torchv-unstructured:1.0.0'
 ### 基础文档解析
 
 ```java
-import com.torchv.infra.unstructured.WordUnstructured;
+import com.torchv.infra.unstructured.UnstructuredParser;
 
 // 解析文档为Markdown格式（推荐用于RAG）
-String content = WordUnstructured.parseToMarkdown("document.docx");
-System.out.
+String content = UnstructuredParser.toMarkdown("document.docx");
+System.out.println(content);
 
-        println(content);
-
-        // 解析文档为带HTML表格的Markdown格式（保持表格结构）
-        String contentWithTables = WordUnstructured.parseToMarkdownWithTables("document.docx");
-System.out.
-
-        println(contentWithTables);
+// 解析文档为带HTML表格的Markdown格式（保持表格结构）
+String contentWithTables = UnstructuredParser.toMarkdownWithHtmlTables("document.docx");
+System.out.println(contentWithTables);
 ```
 
 ### 高级表格提取
 
 ```java
-import com.torchv.infra.unstructured.WordUnstructured;
+import com.torchv.infra.unstructured.UnstructuredParser;
 
 import java.io.File;
 import java.util.List;
 
 // 仅提取Word文档中的表格
-List<String> tables = WordUnstructured.extractTables("document.docx");
-for(
-        int i = 0; i <tables.
+List<String> tables = UnstructuredParser.extractTables("document.docx");
+for (int i = 0; i < tables.size(); i++) {
+    System.out.println("表格 " + (i + 1) + ":");
+    System.out.println(tables.get(i));
+}
 
-        size();
-
-        i++){
-        System.out.
-
-        println("表格 "+(i +1) +":");
-        System.out.
-
-        println(tables.get(i));
-        }
-
-        // Word专用表格解析，提供更多控制
-        String htmlTables = WordUnstructured.parseWordTablesToHtml(new File("document.docx"));
-System.out.
-
-        println(htmlTables);
+// 获取结构化结果，提供更多控制
+DocumentResult result = UnstructuredParser.toStructuredResult("document.docx");
+if (result.isSuccess()) {
+    System.out.println("内容: " + result.getContent());
+    System.out.println("表格: " + result.getTables());
+}
 ```
 
 ### 文件格式支持
 
 ```java
-import com.torchv.infra.unstructured.WordUnstructured;
+import com.torchv.infra.unstructured.UnstructuredParser;
+import com.torchv.infra.unstructured.util.UnstructuredUtils;
 
 // 检查文件格式是否支持
-if(TorchVUnstructured.isSupportedFormat("document.docx")){
-String content = WordUnstructured.parseToMarkdownWithTables("document.docx");
-    System.out.
-
-println("解析成功！");
-}else{
-        System.out.
-
-println("不支持的文件格式");
+if (UnstructuredUtils.isSupportedFormat("document.docx")) {
+    String content = UnstructuredParser.toMarkdownWithHtmlTables("document.docx");
+    System.out.println("解析成功！");
+} else {
+    System.out.println("不支持的文件格式");
 }
 
 // 获取所有支持的格式
-List<String> supportedFormats = WordUnstructured.getSupportedFormats();
-System.out.
-
-println("支持的格式: "+String.join(", ", supportedFormats));
+List<String> supportedFormats = UnstructuredUtils.getSupportedFormats();
+System.out.println("支持的格式: " + String.join(", ", supportedFormats));
 ```
 
 ## 🎯 核心组件
 
 ### 统一入口
 
-- **TorchVUnstructured**：主要入口类，为所有文档解析操作提供简单统一的API
+- **UnstructuredParser**：主要入口类，为所有文档解析操作提供简单统一的API
 
 ### 文档解析器
 
+- **UnstructuredWord**：通用Word文档解析器，支持自动检测
 - **TikaAutoUtils**：支持自动检测的通用文档解析器（底层实现）
 - **WordTableParser**：专业的Word文档表格解析器
 - **DocxTableParser**：高级DOCX表格结构分析器
@@ -144,17 +128,18 @@ println("支持的格式: "+String.join(", ", supportedFormats));
 ### RAG应用集成
 
 ```java
-import com.torchv.infra.unstructured.WordUnstructured;
+import com.torchv.infra.unstructured.UnstructuredParser;
+import com.torchv.infra.unstructured.core.DocumentResult;
 
 // 为RAG应用优化
 public class RAGDocumentProcessor {
 
     public DocumentChunk processDocument(String filePath) {
         // 解析时保持表格结构以获得更好的上下文
-        String content = WordUnstructured.parseToMarkdownWithTables(filePath);
+        String content = UnstructuredParser.toMarkdownWithHtmlTables(filePath);
 
         // 单独提取表格用于结构化数据处理
-        List<String> tables = WordUnstructured.extractTables(filePath);
+        List<String> tables = UnstructuredParser.extractTables(filePath);
 
         return new DocumentChunk(content, tables);
     }
@@ -164,19 +149,20 @@ public class RAGDocumentProcessor {
 ### 批量处理
 
 ```java
-import com.torchv.infra.unstructured.WordUnstructured;
+import com.torchv.infra.unstructured.UnstructuredParser;
+import com.torchv.infra.unstructured.util.UnstructuredUtils;
 
 public class BatchProcessor {
 
     public void processBatch(List<String> filePaths) {
         filePaths.parallelStream()
-                .filter(WordUnstructured::isSupportedFormat)
+                .filter(UnstructuredUtils::isSupportedFormat)
                 .forEach(this::processFile);
     }
 
     private void processFile(String filePath) {
         try {
-            String content = WordUnstructured.parseToMarkdownWithTables(filePath);
+            String content = UnstructuredParser.toMarkdownWithHtmlTables(filePath);
             // 保存或进一步处理内容
             saveProcessedContent(filePath, content);
         } catch (Exception e) {
@@ -189,17 +175,20 @@ public class BatchProcessor {
 ### 错误处理和验证
 
 ```java
+import com.torchv.infra.unstructured.UnstructuredParser;
+import com.torchv.infra.unstructured.util.UnstructuredUtils;
+
 public class DocumentValidator {
     
     public ProcessingResult validateAndProcess(String filePath) {
         // 检查文件格式
-        if (!TorchVUnstructured.isSupportedFormat(filePath)) {
+        if (!UnstructuredUtils.isSupportedFormat(filePath)) {
             return ProcessingResult.unsupportedFormat();
         }
         
         try {
-            String content = TorchVUnstructured.parseToMarkdownWithTables(filePath);
-            List<String> tables = TorchVUnstructured.extractTables(filePath);
+            String content = UnstructuredParser.toMarkdownWithHtmlTables(filePath);
+            List<String> tables = UnstructuredParser.extractTables(filePath);
             
             return ProcessingResult.success(content, tables);
         } catch (RuntimeException e) {

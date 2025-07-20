@@ -149,46 +149,7 @@ public class UnstructuredParser {
             throw new UnsupportedOperationException("暂不支持的文件格式: " + filePath);
         }
     }
-    
-    // ==================== 输入流方法 ====================
-    
-    /**
-     * 从输入流解析文档为纯文本
-     * 
-     * @param inputStream 文档输入流
-     * @param fileName    文件名（用于类型判断）
-     * @return 纯文本内容
-     * @throws RuntimeException 当文件解析失败时
-     */
-    public static String toText(InputStream inputStream, String fileName) {
-        // 根据文件名检测格式
-        if (isWordDocument(fileName)) {
-            return UnstructuredWord.toText(inputStream, fileName);
-        }
-        // TODO: 添加其他格式的支持
-        else {
-            throw new UnsupportedOperationException("暂不支持的文件格式: " + fileName);
-        }
-    }
-    
-    /**
-     * 从输入流解析文档为Markdown格式
-     * 
-     * @param inputStream 文档输入流
-     * @param fileName    文件名（用于类型判断）
-     * @return Markdown格式的文档内容
-     * @throws RuntimeException 当文件解析失败时
-     */
-    public static String toMarkdown(InputStream inputStream, String fileName) {
-        // 根据文件名检测格式
-        if (isWordDocument(fileName)) {
-            return UnstructuredWord.toMarkdown(inputStream, fileName);
-        }
-        // TODO: 添加其他格式的支持
-        else {
-            throw new UnsupportedOperationException("暂不支持的文件格式: " + fileName);
-        }
-    }
+
     
     /**
      * 从输入流解析文档为结构化结果对象

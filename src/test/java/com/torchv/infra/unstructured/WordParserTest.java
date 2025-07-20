@@ -21,6 +21,8 @@ import com.torchv.infra.unstructured.core.DocumentResult;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+import java.util.List;
+
 /**
  * @author <a href="xiaoymin@foxmail.com">xiaoymin@foxmail.com</a>
  * 2025/7/19 23:11
@@ -49,6 +51,11 @@ public class WordParserTest {
         String filePath = "src/test/resources/docs/deploy_llm.docx";
         DocumentResult content = UnstructuredParser.toStructuredResult(filePath);
         log.info(content.getContent());
+
+        log.info("文档标题: {}", content.getFileName());
+        content.getImages().forEach(image -> {
+            log.info("图片名称: {}, 图片路径: {}", image.getName(), image.getData());
+        });
     }
     
     @Test
@@ -63,5 +70,20 @@ public class WordParserTest {
         String filePath = "src/test/resources/docs/test.doc";
         String content = UnstructuredParser.toMarkdown(filePath);
         log.info(content);
+    }
+
+    @Test
+    public void test_parse_3() {
+        String filePath = "src/test/resources/docs/test.docx";
+        // 仅提取Word文档中的表格
+        List<String> tables = UnstructuredParser.extractTables(filePath);
+        for (int i = 0; i < tables.size(); i++) {
+            System.out.println("表格 " + (i + 1) + ":");
+            System.out.println(tables.get(i));
+        }
+
+        log.info("表格数量: {}", tables.size());
+        // 获取结构化结果，提供更多控制
+
     }
 }

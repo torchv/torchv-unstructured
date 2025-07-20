@@ -40,85 +40,69 @@ implementation 'com.torchv.infra:torchv-unstructured:1.0.0'
 ### Basic Document Parsing
 
 ```java
-import com.torchv.infra.unstructured.WordUnstructured;
+import com.torchv.infra.unstructured.UnstructuredParser;
 
 // Parse document to markdown (recommended for RAG)
-String content = WordUnstructured.parseToMarkdown("document.docx");
-System.out.
+String content = UnstructuredParser.toMarkdown("document.docx");
+System.out.println(content);
 
-        println(content);
-
-        // Parse document to markdown with HTML tables (preserving table structure)
-        String contentWithTables = WordUnstructured.parseToMarkdownWithTables("document.docx");
-System.out.
-
-        println(contentWithTables);
+// Parse document to markdown with HTML tables (preserving table structure)
+String contentWithTables = UnstructuredParser.toMarkdownWithHtmlTables("document.docx");
+System.out.println(contentWithTables);
 ```
 
 ### Advanced Table Extraction
 
 ```java
-import com.torchv.infra.unstructured.WordUnstructured;
+import com.torchv.infra.unstructured.UnstructuredParser;
 
 import java.io.File;
 import java.util.List;
 
 // Extract only tables from Word documents
-List<String> tables = WordUnstructured.extractTables("document.docx");
-for(
-        int i = 0; i <tables.
+List<String> tables = UnstructuredParser.extractTables("document.docx");
+for (int i = 0; i < tables.size(); i++) {
+    System.out.println("Table " + (i + 1) + ":");
+    System.out.println(tables.get(i));
+}
 
-        size();
-
-        i++){
-        System.out.
-
-        println("Table "+(i +1) +":");
-        System.out.
-
-        println(tables.get(i));
-        }
-
-        // Word-specific table parsing with more control
-        String htmlTables = WordUnstructured.parseWordTablesToHtml(new File("document.docx"));
-System.out.
-
-        println(htmlTables);
+// Get structured result with more control
+DocumentResult result = UnstructuredParser.toStructuredResult("document.docx");
+if (result.isSuccess()) {
+    System.out.println("Content: " + result.getContent());
+    System.out.println("Tables: " + result.getTables());
+}
 ```
 
 ### File Format Support
 
 ```java
-import com.torchv.infra.unstructured.WordUnstructured;
+import com.torchv.infra.unstructured.UnstructuredParser;
+import com.torchv.infra.unstructured.util.UnstructuredUtils;
 
 // Check if file format is supported
-if(TorchVUnstructured.isSupportedFormat("document.docx")){
-String content = WordUnstructured.parseToMarkdownWithTables("document.docx");
-    System.out.
-
-println("Parsing successful!");
-}else{
-        System.out.
-
-println("Unsupported file format");
+if (UnstructuredUtils.isSupportedFormat("document.docx")) {
+    String content = UnstructuredParser.toMarkdownWithHtmlTables("document.docx");
+    System.out.println("Parsing successful!");
+} else {
+    System.out.println("Unsupported file format");
 }
 
 // Get all supported formats
-List<String> supportedFormats = WordUnstructured.getSupportedFormats();
-System.out.
-
-println("Supported formats: "+String.join(", ", supportedFormats));
+List<String> supportedFormats = UnstructuredUtils.getSupportedFormats();
+System.out.println("Supported formats: " + String.join(", ", supportedFormats));
 ```
 
 ## 🎯 Core Components
 
 ### Unified Entry Point
 
-- **TorchVUnstructured**: Main entry class providing simple and unified API for all document parsing operations
+- **UnstructuredParser**: Main entry class providing simple and unified API for all document parsing operations
 
 ### Document Parsers
 
-- **TikaAutoUtils**: Universal document parsing with auto-detection (underlying implementation)
+- **UnstructuredWord**: Universal Word document parsing with auto-detection  
+- **TikaAutoUtils**: Generic document parsing with auto-detection (underlying implementation)
 - **WordTableParser**: Specialized Word document table parser
 - **DocxTableParser**: Advanced DOCX table structure analyzer
 
@@ -144,17 +128,18 @@ println("Supported formats: "+String.join(", ", supportedFormats));
 ### RAG Application Integration
 
 ```java
-import com.torchv.infra.unstructured.WordUnstructured;
+import com.torchv.infra.unstructured.UnstructuredParser;
+import com.torchv.infra.unstructured.core.DocumentResult;
 
 // Optimized for RAG applications
 public class RAGDocumentProcessor {
 
     public DocumentChunk processDocument(String filePath) {
         // Parse with table structure preservation for better context
-        String content = WordUnstructured.parseToMarkdownWithTables(filePath);
+        String content = UnstructuredParser.toMarkdownWithHtmlTables(filePath);
 
         // Extract tables separately for structured data processing
-        List<String> tables = WordUnstructured.extractTables(filePath);
+        List<String> tables = UnstructuredParser.extractTables(filePath);
 
         return new DocumentChunk(content, tables);
     }
@@ -164,19 +149,20 @@ public class RAGDocumentProcessor {
 ### Batch Processing
 
 ```java
-import com.torchv.infra.unstructured.WordUnstructured;
+import com.torchv.infra.unstructured.UnstructuredParser;
+import com.torchv.infra.unstructured.util.UnstructuredUtils;
 
 public class BatchProcessor {
 
     public void processBatch(List<String> filePaths) {
         filePaths.parallelStream()
-                .filter(WordUnstructured::isSupportedFormat)
+                .filter(UnstructuredUtils::isSupportedFormat)
                 .forEach(this::processFile);
     }
 
     private void processFile(String filePath) {
         try {
-            String content = WordUnstructured.parseToMarkdownWithTables(filePath);
+            String content = UnstructuredParser.toMarkdownWithHtmlTables(filePath);
             // Save or further process the content
             saveProcessedContent(filePath, content);
         } catch (Exception e) {
@@ -189,17 +175,20 @@ public class BatchProcessor {
 ### Error Handling and Validation
 
 ```java
+import com.torchv.infra.unstructured.UnstructuredParser;
+import com.torchv.infra.unstructured.util.UnstructuredUtils;
+
 public class DocumentValidator {
     
     public ProcessingResult validateAndProcess(String filePath) {
         // Check file format
-        if (!TorchVUnstructured.isSupportedFormat(filePath)) {
+        if (!UnstructuredUtils.isSupportedFormat(filePath)) {
             return ProcessingResult.unsupportedFormat();
         }
         
         try {
-            String content = TorchVUnstructured.parseToMarkdownWithTables(filePath);
-            List<String> tables = TorchVUnstructured.extractTables(filePath);
+            String content = UnstructuredParser.toMarkdownWithHtmlTables(filePath);
+            List<String> tables = UnstructuredParser.extractTables(filePath);
             
             return ProcessingResult.success(content, tables);
         } catch (RuntimeException e) {
