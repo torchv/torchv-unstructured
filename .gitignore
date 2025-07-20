@@ -9,6 +9,8 @@ target/
 *.ipr
 .idea
 .vscode
+.idea/misc.xml
+.idea/vcs.xml
 
 ### Eclipse ###
 .apt_generated
