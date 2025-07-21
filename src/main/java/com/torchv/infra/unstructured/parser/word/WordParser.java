@@ -369,7 +369,7 @@ public class WordParser implements AutoCloseable {
     
     private String parseContent(File file) throws IOException {
         File markdownFile = null;
-        try{
+        try {
             if (config.isTableAsHtml()) {
                 markdownFile = WordMarkdownUtils.toMarkdownWithHtmlTable(file);
                 return readFileContent(markdownFile);
@@ -377,7 +377,7 @@ public class WordParser implements AutoCloseable {
                 markdownFile = WordMarkdownUtils.toMarkdown(file);
                 return readFileContent(markdownFile);
             }
-        }finally {
+        } finally {
             FileUtil.del(markdownFile); // 确保临时文件被删除
         }
     }

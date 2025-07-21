@@ -149,7 +149,6 @@ public class UnstructuredParser {
             throw new UnsupportedOperationException("暂不支持的文件格式: " + filePath);
         }
     }
-
     
     /**
      * 从输入流解析文档为结构化结果对象
