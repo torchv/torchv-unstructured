@@ -160,7 +160,7 @@ public class UnstructuredParser {
      */
     public static DocumentResult toStructuredResult(InputStream inputStream, String fileName) {
         // 根据文件名检测格式
-        if (isWordDocument(fileName)) {
+        if (isWordExtension(fileName)) {
             return UnstructuredWord.toStructuredResult(inputStream, fileName);
         }
         // TODO: 添加其他格式的支持
