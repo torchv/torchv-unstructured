@@ -96,6 +96,22 @@ public class UnstructuredParser {
         }
         return toMarkdown(file.getAbsolutePath());
     }
+
+    /**
+     * 将输入流转换为Markdown格式的字符串
+     *
+     * @param inputStream 输入流
+     * @param fileName    文件名，用于检测格式
+     * @return 转换后的Markdown字符串
+     * @throws UnsupportedOperationException 当文件格式不支持时抛出异常
+     */
+    public static String toMarkdown(InputStream inputStream, String fileName) {
+        // 根据文件名检测格式
+        if (!isWordExtension(fileName)) {
+            throw new UnsupportedOperationException("暂不支持的文件格式: " + fileName);
+        }
+        return UnstructuredWord.toMarkdown(inputStream, fileName);
+    }
     
     /**
      * 解析文档为Markdown格式（保留表格的HTML结构）

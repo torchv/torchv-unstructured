@@ -93,6 +93,18 @@ public class WordParserTest {
     }
 
     /**
+     * 测试解析doc文件为markdown格式
+     */
+    @Test
+    public void test_parse_4() {
+        String filePath = "src/test/resources/docs/test.doc";
+        String name = FileUtil.getName(filePath);
+        BufferedInputStream inputStream = FileUtil.getInputStream(new File(filePath));
+        String content = UnstructuredParser.toMarkdown(inputStream,name);
+        log.info(content);
+    }
+
+    /**
      * 测试通过输入流转换为结构化结果
      *
      * @throws Exception 测试过程中可能抛出的异常
