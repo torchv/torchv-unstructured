@@ -17,11 +17,16 @@
 
 package com.torchv.infra.unstructured;
 
+import cn.hutool.core.io.FileUtil;
 import com.torchv.infra.unstructured.core.DocumentResult;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+import java.io.BufferedInputStream;
+import java.io.File;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="xiaoymin@foxmail.com">xiaoymin@foxmail.com</a>
@@ -86,4 +91,32 @@ public class WordParserTest {
         // 获取结构化结果，提供更多控制
         
     }
+
+    /**
+     * 测试解析doc文件为markdown格式
+     */
+    @Test
+    public void test_parse_4() {
+        String filePath = "src/test/resources/docs/test.doc";
+        String name = FileUtil.getName(filePath);
+        BufferedInputStream inputStream = FileUtil.getInputStream(new File(filePath));
+        String content = UnstructuredParser.toMarkdown(inputStream,name);
+        log.info(content);
+    }
+
+    /**
+     * 测试通过输入流转换为结构化结果
+     *
+     * @throws Exception 测试过程中可能抛出的异常
+     */
+    @Test
+    public void test_structured_result_by_stream(){
+        String filePath = "src/test/resources/docs/test.docx";
+        BufferedInputStream inputStream = FileUtil.getInputStream(new File(filePath));
+        String name = FileUtil.getName(filePath);
+        DocumentResult structuredResult = UnstructuredParser.toStructuredResult(inputStream, name);
+        log.info(structuredResult.getContent());
+        assertNotNull(structuredResult);
+    }
+
 }

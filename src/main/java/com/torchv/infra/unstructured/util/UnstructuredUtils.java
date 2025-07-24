@@ -84,8 +84,18 @@ public class UnstructuredUtils {
             return false;
         }
         
-        String fileName = file.getName().toLowerCase();
-        return fileName.endsWith(".docx") || fileName.endsWith(".doc");
+        return isWordExtension(file.getName());
+    }
+    
+    /**
+     * 判断文件是否为Word文档名扩展名
+     *
+     * @param fileName 文件名
+     * @return 如果是docx / doc 返回true，否则返回false
+     */
+    public static boolean isWordExtension(String fileName) {
+        String extension = getFileExtension(fileName.toLowerCase());
+        return "docx".equals(extension) || "doc".equals(extension);
     }
     
     /**
