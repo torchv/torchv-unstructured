@@ -101,6 +101,9 @@ public class WordTableParser {
         StringBuilder html = new StringBuilder();
         html.append(htmlTableBuilder.startTable());
         
+        // 预分析表格以构建逻辑网格映射
+        int[][] logicalGrid = buildLogicalGrid(table);
+        
         for (int rowIndex = 0; rowIndex < table.getRows().size(); rowIndex++) {
             XWPFTableRow row = table.getRows().get(rowIndex);
             html.append(htmlTableBuilder.startRow());
@@ -114,11 +117,15 @@ public class WordTableParser {
                     continue;
                 }
                 
-                // 获取单元格信息
-                CellInfo cellInfo = analyzeCellInfo(table, rowIndex, cellIndex, cell);
+                // 获取当前单元格的逻辑列索引
+                int logicalColIndex = logicalGrid[rowIndex][cellIndex];
                 
-                log.debug("处理单元格 [{}][{}]: 文本='{}', colspan={}, rowspan={}",
-                        rowIndex, cellIndex, cellInfo.getText(), cellInfo.getColspan(), cellInfo.getRowspan());
+                // 获取单元格信息
+                CellInfo cellInfo = analyzeCellInfo(table, rowIndex, cellIndex, logicalColIndex, cell);
+                
+                log.debug("处理单元格 [{}][{}] (逻辑列:{}): 文本='{}', colspan={}, rowspan={}",
+                        rowIndex, cellIndex, logicalColIndex, cellInfo.getText(), cellInfo.getColspan(),
+                        cellInfo.getRowspan());
                 
                 // 生成 HTML 单元格
                 html.append(htmlTableBuilder.buildCell(cellInfo));
@@ -134,11 +141,12 @@ public class WordTableParser {
     /**
      * 分析单元格信息
      */
-    private CellInfo analyzeCellInfo(XWPFTable table, int rowIndex, int cellIndex, XWPFTableCell cell) {
+    private CellInfo analyzeCellInfo(XWPFTable table, int rowIndex, int physicalColIndex, int logicalColIndex,
+                                     XWPFTableCell cell) {
         CTTcPr cellPr = cell.getCTTc().getTcPr();
         
         int colspan = cellMergeAnalyzer.getColspan(cellPr);
-        int rowspan = cellMergeAnalyzer.calculateRowspan(table, rowIndex, cellIndex);
+        int rowspan = cellMergeAnalyzer.calculateRowspan(table, rowIndex, physicalColIndex);
         
         String text = cell.getText();
         if (text == null || text.trim().isEmpty()) {
@@ -148,6 +156,47 @@ public class WordTableParser {
         }
         
         return new CellInfo(text, colspan, rowspan);
+    }
+    
+    /**
+     * 构建逻辑网格映射
+     * 这个方法创建一个映射表，将每个物理单元格索引映射到逻辑列索引
+     */
+    private int[][] buildLogicalGrid(XWPFTable table) {
+        int rowCount = table.getRows().size();
+        int maxCells = 0;
+        
+        // 首先找到最大单元格数量
+        for (XWPFTableRow row : table.getRows()) {
+            maxCells = Math.max(maxCells, row.getTableCells().size());
+        }
+        
+        int[][] grid = new int[rowCount][maxCells];
+        
+        for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+            XWPFTableRow row = table.getRows().get(rowIndex);
+            int logicalColIndex = 0;
+            
+            for (int cellIndex = 0; cellIndex < row.getTableCells().size(); cellIndex++) {
+                XWPFTableCell cell = row.getTableCells().get(cellIndex);
+                
+                // 跳过被垂直合并的单元格，不会占用逻辑列位置
+                if (cellMergeAnalyzer.shouldSkipCell(cell)) {
+                    grid[rowIndex][cellIndex] = -1; // 标记为跳过
+                    continue;
+                }
+                
+                // 记录当前单元格的逻辑列索引
+                grid[rowIndex][cellIndex] = logicalColIndex;
+                
+                // 获取colspan以计算下一个逻辑列位置
+                CTTcPr cellPr = cell.getCTTc().getTcPr();
+                int colspan = cellMergeAnalyzer.getColspan(cellPr);
+                logicalColIndex += colspan;
+            }
+        }
+        
+        return grid;
     }
     
     /**
