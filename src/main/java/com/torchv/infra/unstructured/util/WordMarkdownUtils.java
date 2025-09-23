@@ -24,6 +24,7 @@ import com.torchv.infra.unstructured.handler.markdown.DocMarkdownTableHandler;
 import com.torchv.infra.unstructured.handler.markdown.DocxMarkdownTableHandler;
 import com.torchv.infra.unstructured.handler.markdown.ExtendedMarkdownContentHandler;
 import com.torchv.infra.unstructured.handler.markdown.MarkdownContentHandler;
+import com.torchv.infra.unstructured.job.FileCleanupManager;
 import com.torchv.infra.unstructured.parser.word.WordTableParser;
 import com.torchv.infra.unstructured.parser.word.model.DocumentImage;
 import lombok.SneakyThrows;
@@ -349,9 +350,12 @@ public class WordMarkdownUtils {
                 FileUtil.appendUtf8String("\n", target);
             }
         }
+        // 替换直接删除为加入清理队列
         if (delSourceFile) {
-            FileUtil.del(source);
+            // ypc add
+            FileCleanupManager.getInstance().addToCleanupQueue(source);
         }
+        
         return target;
     }
     

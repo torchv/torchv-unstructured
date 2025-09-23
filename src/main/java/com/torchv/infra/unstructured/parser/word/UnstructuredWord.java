@@ -108,6 +108,31 @@ public class UnstructuredWord {
             throw new RuntimeException("文档解析失败: " + e.getMessage(), e);
         }
     }
+
+    /** ypc add
+     * 解析文档为纯文本（推荐用于全文搜索、索引）
+     *
+     * @param file 文档文件
+     * @return 纯文本内容
+     * @throws IllegalArgumentException 当文件不存在或路径无效时
+     */
+    public static String toStructuredResult(File file) {
+        if (file == null || !file.exists()) {
+            throw new IllegalArgumentException("文件不存在或路径无效: " + file);
+        }
+        String filePath = file.getAbsolutePath();
+        
+        try (WordParser parser = createDefaultParser()) {
+            DocumentResult result = parser.parse(filePath);
+            if (!result.isSuccess()) {
+                throw new RuntimeException("文档解析失败: " + result.getErrorMessage());
+            }
+            return result.getContent();
+        } catch (Exception e) {
+            log.error("解析文档失败: {}", filePath, e);
+            throw new RuntimeException("文档解析失败: " + e.getMessage(), e);
+        }
+    }
     
     /**
      * 仅提取文档中的表格数据（HTML格式）
@@ -258,6 +283,9 @@ public class UnstructuredWord {
             
             try {
                 if (isSupportedFormat(filePath)) {
+                    String markdown = toMarkdown(filePath);
+                    File file = new File(filePath);
+                    String structuredResult = toStructuredResult(file);
                     DocumentResult result = toStructuredResult(filePath);
                     if (result.isSuccess()) {
                         System.out.println("解析成功！内容长度: " + result.getContent().length() + " 字符");
@@ -270,6 +298,7 @@ public class UnstructuredWord {
                     } else {
                         System.err.println("解析失败: " + result.getErrorMessage());
                     }
+                    System.out.println(result.getContent());
                 } else {
                     System.out.println("不支持的文件格式");
                 }
