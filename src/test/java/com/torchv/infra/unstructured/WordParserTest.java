@@ -91,7 +91,7 @@ public class WordParserTest {
         // 获取结构化结果，提供更多控制
         
     }
-
+    
     /**
      * 测试解析doc文件为markdown格式
      */
@@ -100,17 +100,17 @@ public class WordParserTest {
         String filePath = "src/test/resources/docs/test.doc";
         String name = FileUtil.getName(filePath);
         BufferedInputStream inputStream = FileUtil.getInputStream(new File(filePath));
-        String content = UnstructuredParser.toMarkdown(inputStream,name);
+        String content = UnstructuredParser.toMarkdown(inputStream, name);
         log.info(content);
     }
-
+    
     /**
      * 测试通过输入流转换为结构化结果
      *
      * @throws Exception 测试过程中可能抛出的异常
      */
     @Test
-    public void test_structured_result_by_stream(){
+    public void test_structured_result_by_stream() {
         String filePath = "src/test/resources/docs/test.docx";
         BufferedInputStream inputStream = FileUtil.getInputStream(new File(filePath));
         String name = FileUtil.getName(filePath);
@@ -118,5 +118,5 @@ public class WordParserTest {
         log.info(structuredResult.getContent());
         assertNotNull(structuredResult);
     }
-
+    
 }
