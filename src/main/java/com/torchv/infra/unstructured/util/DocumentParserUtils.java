@@ -17,20 +17,12 @@
 
 package com.torchv.infra.unstructured.util;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
-import com.torchv.infra.unstructured.handler.markdown.DocMarkdownTableHandler;
-import com.torchv.infra.unstructured.handler.markdown.DocxMarkdownTableHandler;
-import com.torchv.infra.unstructured.handler.markdown.MarkdownContentHandler;
-import com.torchv.infra.unstructured.handler.markdown.ExtendedMarkdownContentHandler;
-import com.torchv.infra.unstructured.parser.word.WordTableParser;
 import com.torchv.infra.unstructured.parser.word.doc.DocImageExtractor;
-import com.torchv.infra.unstructured.parser.word.model.DocumentImage;
 import com.torchv.infra.unstructured.parser.word.docx.DocxImageExtractor;
-import lombok.SneakyThrows;
+import com.torchv.infra.unstructured.parser.word.model.DocumentImage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.model.PicturesTable;
@@ -38,14 +30,9 @@ import org.apache.poi.hwpf.usermodel.Picture;
 import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFPictureData;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.AutoDetectParser;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.ocr.TesseractOCRConfig;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
