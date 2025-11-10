@@ -88,8 +88,8 @@ public class TableStructureAnalyzer {
         cellStructure.setColspan(cellMergeAnalyzer.getColspan(cellPr));
         cellStructure.setRowspan(cellMergeAnalyzer.calculateRowspan(table, rowIndex, cellIndex));
         cellStructure.setShouldSkip(cellMergeAnalyzer.shouldSkipCell(cell));
-        cellStructure.setMergeStart(cellMergeAnalyzer.isMergeStartCell(cell));
-        cellStructure.setMerged(cellMergeAnalyzer.isMergedCell(cell));
+        // cellStructure.setMergeStart(cellMergeAnalyzer.isMergeStartCell(cell));
+        // cellStructure.setMerged(cellMergeAnalyzer.isMergedCell(cell));
         
         return cellStructure;
     }

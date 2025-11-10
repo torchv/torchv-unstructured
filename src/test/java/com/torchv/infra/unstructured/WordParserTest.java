@@ -38,7 +38,7 @@ public class WordParserTest {
     
     @Test
     public void test_word() {
-        String filePath = "src/main/resources/复杂样式文档.docx";
+        String filePath = "src/test/resources/docs/test.docx";
         String content = UnstructuredParser.toMarkdown(filePath);
         log.info(content);
     }
@@ -46,9 +46,9 @@ public class WordParserTest {
     @Test
     public void test_parse() {
         log.info("开始解析Word文档");
-        String filePath = "src/main/resources/复杂样式文档.docx";
-        String content = UnstructuredParser.extractKeyValuePairs(filePath).toString();
-        log.info(content);
+        String filePath = "src/test/resources/docs/test.docx";
+        DocumentResult content = UnstructuredParser.toStructuredResult(filePath);
+        log.info(content.getContent());
     }
     
     @Test
@@ -79,7 +79,7 @@ public class WordParserTest {
     
     @Test
     public void test_parse_3() {
-        String filePath = "src/main/resources/复杂样式文档.docx";
+        String filePath = "src/test/resources/docs/test.docx";
         // 仅提取Word文档中的表格
         List<String> tables = UnstructuredParser.extractTables(filePath);
         for (int i = 0; i < tables.size(); i++) {
@@ -111,7 +111,7 @@ public class WordParserTest {
      */
     @Test
     public void test_structured_result_by_stream() {
-        String filePath = "src/main/resources/复杂样式文档.docx";
+        String filePath = "src/test/resources/docs/test.docx";
         BufferedInputStream inputStream = FileUtil.getInputStream(new File(filePath));
         String name = FileUtil.getName(filePath);
         DocumentResult structuredResult = UnstructuredParser.toStructuredResult(inputStream, name);
