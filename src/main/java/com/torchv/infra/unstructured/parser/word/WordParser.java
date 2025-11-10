@@ -21,7 +21,9 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.torchv.infra.unstructured.core.DocumentImage;
 import com.torchv.infra.unstructured.core.DocumentResult;
+import com.torchv.infra.unstructured.core.KeyValuePair;
 import com.torchv.infra.unstructured.core.UnstructuredConfig;
+import com.torchv.infra.unstructured.extractor.KeyValueExtractor;
 import com.torchv.infra.unstructured.util.DocumentParserUtils;
 import com.torchv.infra.unstructured.util.UnstructuredUtils;
 import com.torchv.infra.unstructured.util.WordMarkdownUtils;
@@ -34,6 +36,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
+
+import static com.torchv.infra.unstructured.parser.word.UnstructuredWord.toMarkdown;
 
 /**
  * TorchV Unstructured 高级文档解析器
@@ -613,5 +617,39 @@ public class WordParser implements AutoCloseable {
                 config = UnstructuredConfig.defaultConfig();
             }
         }
+    }
+    
+    // ==================== K-V 格式提取方法 ====================
+    
+    /**
+     * 提取文档中的键值对（K-V格式）
+     * 专为RAG应用优化，将文档信息原子化为独立的语义单元
+     *
+     * @param filePath 文档文件路径
+     * @return 键值对列表
+     * @throws IOException 当文件读取失败时
+     */
+    public List<KeyValuePair> extractKeyValuePairs(String filePath) throws IOException {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            throw new FileNotFoundException("文件不存在: " + filePath);
+        }
+        
+        List<KeyValuePair> allPairs = new ArrayList<>();
+        
+        // 1. 从文本内容中提取键值对
+        String markdown = toMarkdown(filePath);
+        List<KeyValuePair> textPairs = KeyValueExtractor.extractFromText(markdown);
+        allPairs.addAll(textPairs);
+        
+        // 2. 从表格中提取键值对
+        List<String> tables = extractTables(new File(filePath));
+        for (String table : tables) {
+            List<KeyValuePair> tablePairs = KeyValueExtractor.extractFromTable(table);
+            allPairs.addAll(tablePairs);
+        }
+        
+        log.info("从文档 {} 中提取到 {} 个键值对", filePath, allPairs.size());
+        return allPairs;
     }
 }

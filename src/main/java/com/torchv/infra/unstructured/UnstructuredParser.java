@@ -18,6 +18,7 @@
 package com.torchv.infra.unstructured;
 
 import com.torchv.infra.unstructured.core.DocumentResult;
+import com.torchv.infra.unstructured.core.KeyValuePair;
 import com.torchv.infra.unstructured.parser.word.UnstructuredWord;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,18 +33,22 @@ import static com.torchv.infra.unstructured.util.UnstructuredUtils.*;
  * 支持Word、PDF、PPT、Excel等多种格式的统一解析。
  * 
  * <h3>快速开始：</h3>
- * 
+ *
  * <pre>{@code
  *
  * // 解析为Markdown格式（推荐知识库场景）
  * String markdown = UnstructuredParser.toMarkdown("document.docx");
- * 
+ *
  * // 解析为完整结构化结果（复杂场景）
  * DocumentResult result = UnstructuredParser.toStructuredResult("presentation.pptx");
- * 
+ *
  * // 仅提取表格数据
  * List<String> tables = UnstructuredParser.extractTables("spreadsheet.xlsx");
- * 
+ *
+ * // 提取键值对（K-V格式，适合RAG应用）
+ * List<KeyValuePair> kvPairs = UnstructuredParser.extractKeyValuePairs("document.docx");
+ * String kvMarkdown = UnstructuredParser.toKeyValueMarkdown("document.docx");
+ *
  * // 针对知识库优化的解析
  * DocumentResult kbResult = UnstructuredParser.forKnowledgeBase("document.docx");
  * }</pre>
@@ -58,8 +63,8 @@ import static com.torchv.infra.unstructured.util.UnstructuredUtils.*;
  * 
  * <h3>API设计理念：</h3>
  * <ul>
- * <li><strong>toXxx()</strong> - 输出格式明确，如toText(), toMarkdown()</li>
- * <li><strong>extractXxx()</strong> - 提取特定内容，如extractTables()</li>
+ * <li><strong>toXxx()</strong> - 输出格式明确，如toText(), toMarkdown(), toKeyValueMarkdown()</li>
+ * <li><strong>extractXxx()</strong> - 提取特定内容，如extractTables(), extractKeyValuePairs()</li>
  * <li><strong>forXxx()</strong> - 针对特定场景优化，如forKnowledgeBase()</li>
  * </ul>
  * 
@@ -96,7 +101,7 @@ public class UnstructuredParser {
         }
         return toMarkdown(file.getAbsolutePath());
     }
-
+    
     /**
      * 将输入流转换为Markdown格式的字符串
      *
@@ -208,7 +213,7 @@ public class UnstructuredParser {
     /**
      * 针对AI训练数据处理的解析方法
      * 专门优化用于AI模型训练的数据预处理
-     * 
+     *
      * @param filePath 文档文件路径
      * @return Markdown格式的训练数据
      */
@@ -216,6 +221,88 @@ public class UnstructuredParser {
         // 检测文件格式
         if (isWordDocument(filePath)) {
             return UnstructuredWord.forAiTraining(filePath);
+        }
+        // TODO: 添加其他格式的支持
+        else {
+            throw new UnsupportedOperationException("暂不支持的文件格式: " + filePath);
+        }
+    }
+    
+    /**
+     * 提取文档中的键值对（K-V格式）
+     * 专为RAG应用优化，将文档信息原子化为独立的语义单元
+     *
+     * <p>支持的格式：</p>
+     * <ul>
+     * <li>冒号分隔：键: 值</li>
+     * <li>等号分隔：键 = 值</li>
+     * <li>Markdown 格式：- **键**: 值</li>
+     * <li>问答格式：Q: 问题 A: 答案</li>
+     * <li>表格行：| 键 | 值 |</li>
+     * </ul>
+     *
+     * @param filePath 文档文件路径
+     * @return 键值对列表
+     * @throws RuntimeException 当文件解析失败时
+     */
+    public static List<KeyValuePair> extractKeyValuePairs(String filePath) {
+        // 检测文件格式
+        if (isWordDocument(filePath)) {
+            return UnstructuredWord.extractKeyValuePairs(filePath);
+        }
+        // TODO: 添加其他格式的支持
+        else {
+            throw new UnsupportedOperationException("暂不支持的文件格式: " + filePath);
+        }
+    }
+    
+    /**
+     * 提取文档中的键值对并转换为 Markdown 格式
+     *
+     * @param filePath 文档文件路径
+     * @return Markdown 格式的键值对字符串
+     * @throws RuntimeException 当文件解析失败时
+     */
+    public static String toKeyValueMarkdown(String filePath) {
+        // 检测文件格式
+        if (isWordDocument(filePath)) {
+            return UnstructuredWord.toKeyValueMarkdown(filePath);
+        }
+        // TODO: 添加其他格式的支持
+        else {
+            throw new UnsupportedOperationException("暂不支持的文件格式: " + filePath);
+        }
+    }
+    
+    /**
+     * 提取文档中的键值对并转换为纯文本格式
+     *
+     * @param filePath 文档文件路径
+     * @return 纯文本格式的键值对字符串
+     * @throws RuntimeException 当文件解析失败时
+     */
+    public static String toKeyValueText(String filePath) {
+        // 检测文件格式
+        if (isWordDocument(filePath)) {
+            return UnstructuredWord.toKeyValueText(filePath);
+        }
+        // TODO: 添加其他格式的支持
+        else {
+            throw new UnsupportedOperationException("暂不支持的文件格式: " + filePath);
+        }
+    }
+    
+    /**
+     * 提取文档中的键值对并转换为 JSON 数组格式
+     *
+     * @param filePath 文档文件路径
+     * @return JSON 数组格式的键值对字符串
+     * @throws RuntimeException 当文件解析失败时
+     */
+    public static String toKeyValueJson(String filePath) {
+        // 检测文件格式
+        if (isWordDocument(filePath)) {
+            return UnstructuredWord.toKeyValueJson(filePath);
         }
         // TODO: 添加其他格式的支持
         else {

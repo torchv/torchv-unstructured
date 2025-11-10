@@ -19,10 +19,13 @@ package com.torchv.infra.unstructured.parser.word;
 
 import com.torchv.infra.unstructured.UnstructuredParser;
 import com.torchv.infra.unstructured.core.DocumentResult;
+import com.torchv.infra.unstructured.core.KeyValuePair;
 import com.torchv.infra.unstructured.core.UnstructuredConfig;
+import com.torchv.infra.unstructured.extractor.KeyValueExtractor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.torchv.infra.unstructured.util.UnstructuredUtils.*;
@@ -279,5 +282,58 @@ public class UnstructuredWord {
         } else {
             printUsageExample();
         }
+    }
+    
+    /**
+     * 提取文档中的键值对（K-V格式）
+     * 专为RAG应用优化，将文档信息原子化为独立的语义单元
+     *
+     * @param filePath 文档文件路径
+     * @return 键值对列表
+     * @throws RuntimeException 当文件解析失败时
+     */
+    public static List<KeyValuePair> extractKeyValuePairs(String filePath) {
+        try (WordParser parser = new WordParser()) {
+            return parser.extractKeyValuePairs(filePath);
+        } catch (Exception e) {
+            log.error("提取键值对失败: {}", filePath, e);
+            throw new RuntimeException("提取键值对失败: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * 提取文档中的键值对并转换为 Markdown 格式
+     *
+     * @param filePath 文档文件路径
+     * @return Markdown 格式的键值对字符串
+     * @throws RuntimeException 当文件解析失败时
+     */
+    public static String toKeyValueMarkdown(String filePath) {
+        List<KeyValuePair> pairs = extractKeyValuePairs(filePath);
+        return KeyValueExtractor.toMarkdown(pairs);
+    }
+    
+    /**
+     * 提取文档中的键值对并转换为纯文本格式
+     *
+     * @param filePath 文档文件路径
+     * @return 纯文本格式的键值对字符串
+     * @throws RuntimeException 当文件解析失败时
+     */
+    public static String toKeyValueText(String filePath) {
+        List<KeyValuePair> pairs = extractKeyValuePairs(filePath);
+        return KeyValueExtractor.toPlainText(pairs);
+    }
+    
+    /**
+     * 提取文档中的键值对并转换为 JSON 数组格式
+     *
+     * @param filePath 文档文件路径
+     * @return JSON 数组格式的键值对字符串
+     * @throws RuntimeException 当文件解析失败时
+     */
+    public static String toKeyValueJson(String filePath) {
+        List<KeyValuePair> pairs = extractKeyValuePairs(filePath);
+        return KeyValueExtractor.toJsonArray(pairs);
     }
 }

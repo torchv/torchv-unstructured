@@ -38,7 +38,7 @@ public class WordParserTest {
     
     @Test
     public void test_word() {
-        String filePath = "src/test/resources/docs/test.docx";
+        String filePath = "src/main/resources/复杂样式文档.docx";
         String content = UnstructuredParser.toMarkdown(filePath);
         log.info(content);
     }
@@ -46,9 +46,9 @@ public class WordParserTest {
     @Test
     public void test_parse() {
         log.info("开始解析Word文档");
-        String filePath = "src/test/resources/docs/test.docx";
-        DocumentResult content = UnstructuredParser.toStructuredResult(filePath);
-        log.info(content.getContent());
+        String filePath = "src/main/resources/复杂样式文档.docx";
+        String content = UnstructuredParser.extractKeyValuePairs(filePath).toString();
+        log.info(content);
     }
     
     @Test
@@ -79,7 +79,7 @@ public class WordParserTest {
     
     @Test
     public void test_parse_3() {
-        String filePath = "src/test/resources/docs/test.docx";
+        String filePath = "src/main/resources/复杂样式文档.docx";
         // 仅提取Word文档中的表格
         List<String> tables = UnstructuredParser.extractTables(filePath);
         for (int i = 0; i < tables.size(); i++) {
@@ -91,7 +91,7 @@ public class WordParserTest {
         // 获取结构化结果，提供更多控制
         
     }
-
+    
     /**
      * 测试解析doc文件为markdown格式
      */
@@ -100,23 +100,23 @@ public class WordParserTest {
         String filePath = "src/test/resources/docs/test.doc";
         String name = FileUtil.getName(filePath);
         BufferedInputStream inputStream = FileUtil.getInputStream(new File(filePath));
-        String content = UnstructuredParser.toMarkdown(inputStream,name);
+        String content = UnstructuredParser.toMarkdown(inputStream, name);
         log.info(content);
     }
-
+    
     /**
      * 测试通过输入流转换为结构化结果
      *
      * @throws Exception 测试过程中可能抛出的异常
      */
     @Test
-    public void test_structured_result_by_stream(){
-        String filePath = "src/test/resources/docs/test.docx";
+    public void test_structured_result_by_stream() {
+        String filePath = "src/main/resources/复杂样式文档.docx";
         BufferedInputStream inputStream = FileUtil.getInputStream(new File(filePath));
         String name = FileUtil.getName(filePath);
         DocumentResult structuredResult = UnstructuredParser.toStructuredResult(inputStream, name);
         log.info(structuredResult.getContent());
         assertNotNull(structuredResult);
     }
-
+    
 }

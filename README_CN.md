@@ -13,6 +13,7 @@
 - **智能表格解析**：先进的表格结构分析，支持复杂单元格合并检测
 - **多格式支持**：无缝处理DOC、DOCX、PDF等多种文档格式
 - **RAG优化输出**：专为AI/ML管道设计的结构化内容提取
+- **K-V格式提取** ⭐ **NEW**：智能提取键值对信息，将文档信息原子化为独立语义单元
 - **Markdown和HTML导出**：灵活的输出格式，保持表格结构完整性
 - **图像提取**：自动提取和处理嵌入式图像
 - **内存高效**：优化的大文档处理，最小化内存占用
@@ -73,6 +74,48 @@ if (result.isSuccess()) {
     System.out.println("表格: " + result.getTables());
 }
 ```
+
+### K-V 格式提取（键值对提取）⭐ NEW
+
+```java
+import com.torchv.infra.unstructured.UnstructuredParser;
+import com.torchv.infra.unstructured.core.KeyValuePair;
+import java.util.List;
+
+// 从文档中提取键值对
+List<KeyValuePair> kvPairs = UnstructuredParser.extractKeyValuePairs("document.docx");
+
+// 打印所有键值对
+for (KeyValuePair pair : kvPairs) {
+    System.out.println(pair.getKey() + ": " + pair.getValue());
+    System.out.println("  置信度: " + pair.getConfidence());
+}
+
+// 转换为 Markdown 格式
+String kvMarkdown = UnstructuredParser.toKeyValueMarkdown("document.docx");
+System.out.println(kvMarkdown);
+
+// 转换为 JSON 格式
+String kvJson = UnstructuredParser.toKeyValueJson("document.docx");
+System.out.println(kvJson);
+```
+
+**支持的 K-V 格式：**
+
+- 冒号分隔：`产品名称: TorchV Unstructured`
+- Markdown 格式：`- **版本**: 1.0.0`
+- 等号分隔：`timeout = 30秒`
+- 问答格式：`Q: 忘记密码怎么办？ A: 点击找回密码`
+- 表格格式：自动从表格中提取键值对
+
+**为什么使用 K-V 格式？**
+
+1. **信息原子化**：每条只讲一件事，避免无关信息干扰
+2. **关键词明确**：Key 本身就是语义标签，容易匹配用户问题
+3. **减少噪声**：不像大段文字包含冗余描述
+4. **便于向量化**：每个 K-V 可作为独立 chunk 生成 embedding，提升检索精度
+
+详细说明请参考：[K-V格式提取功能说明.md](./K-V格式提取功能说明.md)
 
 ### 文件格式支持
 

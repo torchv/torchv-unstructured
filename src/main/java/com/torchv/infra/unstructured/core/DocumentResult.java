@@ -72,6 +72,13 @@ public class DocumentResult {
     private final List<DocumentImage> images = List.of();
     
     /**
+     * 提取的键值对列表（K-V格式）
+     * 专为RAG应用优化，将文档信息原子化为独立的语义单元
+     */
+    @Builder.Default
+    private final List<KeyValuePair> keyValuePairs = List.of();
+    
+    /**
      * 文档元数据
      */
     @Builder.Default
